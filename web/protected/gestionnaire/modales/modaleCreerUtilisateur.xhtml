@@ -1,0 +1,113 @@
+<ui:composition 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:f="http://xmlns.jcp.org/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+    <p:dialog id="modaleCreerUtilisateur" header="Créer un profil utilisateur" widgetVar="modaleCreerUtilisateur" modal="true" resizable="false" onShow="PF('modaleCreerUtilisateur').initPosition()" width="70%" style="height: auto; max-height: 80%; overflow-y: auto;">
+        <p:ajax event="close" update="formulaireListerUtilisateurs listeComptesClient" listener="#{gestionUtilisateurBacking.rafraichirListeUtilisateurs()}" />
+        <div class="main">
+            <br/>
+            <h:form id="formulaireCreerUtilisateur">
+
+                <p:wizard widgetVar="wiz" flowListener="#{gestionUtilisateurBacking.onFlowProcess}" showStepStatus="false" nextLabel="Étape suivante" backLabel="Étape précédente">
+                    
+                    <p:tab id="informations" title="Informations personnelles">
+                        <p:panel header="Informations utilisateur">
+                            <p:messages showDetail="true" autoUpdate="true" closable="true"/>
+                            <h:panelGrid columns="2"  cellpadding="5">
+                                <h:outputText value="Nom d'utilisateur : *" />
+                                <h:inputText id="nomUtilisateur" value="#{gestionUtilisateurBacking.nomUtilisateur}" required="true" requiredMessage="Le nom d'utilisateur est requis."> 
+                                    <f:ajax id="validationNomKeyUp" event="keyup" delay="500" execute="nomUtilisateur" listener="#{gestionUtilisateurBacking.verifierNomUtilisateur}" />
+                                    <f:ajax id="validationNomChange" event="change" execute="nomUtilisateur" listener="#{gestionUtilisateurBacking.verifierNomUtilisateur}" />
+                                </h:inputText>
+                                <h:outputText value="Mot de passe : *" />
+                                <h:inputSecret id="password" value="#{gestionUtilisateurBacking.motDePasse}" required="true" requiredMessage="Le mot de passe est requis.">
+                                    <f:ajax event="change" execute="password" listener="#{gestionUtilisateurBacking.longeurMotDePasseOK(gestionUtilisateurBacking.motDePasse)}" />
+                                </h:inputSecret>
+                                <h:outputText value="Confirmer mot de passe : *" />
+                                <h:inputSecret id="passwordConfirm" value="#{gestionUtilisateurBacking.confirmationMotDePasse}" required="true" requiredMessage="La confirmation du mot de passe est requise." >
+                                    <f:ajax event="change" execute="passwordConfirm" listener="#{gestionUtilisateurBacking.confirmMotDePasseOK(gestionUtilisateurBacking.confirmationMotDePasse, gestionUtilisateurBacking.motDePasse)}" />
+                                </h:inputSecret>
+                                <h:outputText value="Créer un gestionnaire : " />
+                                <h:selectBooleanCheckbox id="estUnGestionnaire" value="#{gestionUtilisateurBacking.estUnGestionnaire}">
+                                    <p:ajax event="change" update="lierCompte lier" />
+                                </h:selectBooleanCheckbox>
+                                <h:outputText value="Date de naissance : *" />
+                                <p:calendar id="dateDeNaissance" value="#{gestionUtilisateurBacking.dateDeNaissance}" lang="fr" locale="fr" navigator="true" mode="popup" pattern="dd/MM/yyyy" yearRange="c-100:c" required="true" requiredMessage="La date de naissance est requise.">
+                                    <f:ajax event="dateSelect" listener="#{gestionUtilisateurBacking.verifierAge(gestionUtilisateurBacking.dateDeNaissance)}"/>                                
+                                </p:calendar>
+                                <h:outputText value="Compte(s) à lier : " />
+                                <h:selectBooleanCheckbox id="lierCompte" value="#{gestionUtilisateurBacking.lierCompte}" disabled="#{gestionUtilisateurBacking.estUnGestionnaire ? 'true' : 'false'}"/>
+                                
+                            </h:panelGrid>
+                        </p:panel>
+                    </p:tab>
+
+                    <p:tab id="lier" title="Liaison de compte(s)" disabled="#{gestionUtilisateurBacking.estUnGestionnaire ? 'true' : 'false'}">
+                        <p:panel header="Liaison de compte(s)">
+                            <p:messages showDetail="true" closable="true"/>
+                            <p:pickList id="PojoPickList" value="#{gestionUtilisateurBacking.listeDouble}" var="comptes"
+                                        itemValue="#{comptes}" itemLabel="#{comptes.afficherInformations()}" converter="entityConverter" showCheckbox="true" responsive="true"
+                                        showSourceFilter="true" showTargetFilter="true" filterMatchMode="contains">
+
+                                <f:facet name="sourceCaption">Compte(s) non-lié(s) à ce client</f:facet>
+                                <f:facet name="targetCaption">Compte(s) lié(s) à ce client</f:facet>
+
+                                <p:ajax event="transfer" listener="#{gestionUtilisateurBacking.onTransfer}" />
+                                <p:ajax event="select" listener="#{gestionUtilisateurBacking.onSelect}" />
+                                <p:ajax event="unselect" listener="#{gestionUtilisateurBacking.onUnselect}" />
+                                <p:ajax event="reorder" listener="#{gestionUtilisateurBacking.onReorder}" />
+
+                                <p:column style="width:100%;">
+                                    <h:outputText value="#{comptes.afficherInformations()}" />
+                                </p:column>
+                            </p:pickList>
+                            
+                        </p:panel>
+                    </p:tab>
+                    
+                    <p:tab id="confirmation" title="Aperçu avant création">
+                        <p:panel header="Aperçu avant création">
+                            <p:messages showDetail="true" closable="true"/>
+                            <h:panelGrid columns="2">
+                                <h:outputText value="Nom d'utilisateur : " />
+                                <h:outputText value="#{gestionUtilisateurBacking.nomUtilisateur}" /> 
+                                <h:outputText value="Date de naissance : " />
+                                <h:outputText value="#{gestionUtilisateurBacking.dateDeNaissance}" />
+                                <h:outputText value="Type d'utilisateur : " />
+                                <h:outputText value="#{gestionUtilisateurBacking.estUnGestionnaire ? 'Gestionnaire' : 'Client'}" />
+                                <c:choose>
+                                    <c:when test="#{gestionUtilisateurBacking.estUnGestionnaire == false and gestionUtilisateurBacking.listeDouble.target.size() > 0}">
+                                        <h:outputText value="Propriétaire de : " />
+                                        <c:forEach var="compte" items="#{gestionUtilisateurBacking.listeDouble.target}">
+                                            <c:choose>
+                                                <c:when test="#{!gestionUtilisateurBacking.listeDouble.target.get(0).equals(compte)}">
+                                                    <h:outputText value="" />
+                                                </c:when>
+                                            </c:choose>
+                                            <h:outputText value="#{compte.afficherInformations()}" />
+                                        </c:forEach>
+                                    </c:when>
+                                </c:choose>
+                            </h:panelGrid>
+                            <br />
+                            
+                            <h:outputText value="Après la création : " /><br />
+                            <h:selectOneRadio value="#{gestionUtilisateurBacking.continuerApresCreation}">
+                                <f:selectItem itemValue="true" itemLabel="Créer un autre utilisateur" />
+                                <f:selectItem itemValue="false" itemLabel="Retourner à la liste des utilisateurs" />
+                            </h:selectOneRadio>
+                            <br />
+                            
+                            <p:commandButton id="btn" value="Créer cet utilisateur" action="#{gestionUtilisateurBacking.creerUtilisateur}" update="formulaireListerUtilisateurs formulaireCreerUtilisateur" />
+                        </p:panel>
+                    </p:tab>
+                    
+                </p:wizard>
+            </h:form>
+            <br />
+        </div>
+    </p:dialog>
+</ui:composition>

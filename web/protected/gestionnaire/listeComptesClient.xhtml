@@ -1,0 +1,53 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:f="http://xmlns.jcp.org/jsf/core"
+    xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+    <!-- <h:form > -->
+        <f:loadBundle basename="pridbank.ressources.Bundle" var="bundle"/>
+        
+        <h:form id="listeComptesClient">
+            <c:choose>
+                <c:when test="#{gestionUtilisateurBacking.utilisateurSelectionne != null}">
+                    <c:choose>
+                        <c:when test="#{!gestionUtilisateurBacking.utilisateurSelectionne.estUnGestionnaire}">
+                            <br />
+                            <p:dataTable id="listeCptClient" widgetVar="listeComptesIndexWidgetVar" var="compte" value="#{gestionUtilisateurBacking.utilisateurSelectionne.listeDesComptes}" selectionMode="single" rowKey="#{compte.numero}" emptyMessage="Aucun compte n'est associé à #{gestionUtilisateurBacking.utilisateurSelectionne.nomUtilisateur}">
+                                <p:ajax event="rowDblselect" listener="#{gestionUtilisateurBacking.onRowDblclickCompteUtilisateur}" />
+                                <f:facet name="header">
+                                    Compte(s) du client sélectionné
+                                </f:facet>
+                                <p:column headerText="" width="50">
+                                    <p:commandButton actionListener="#{gestionUtilisateurBacking.redirigerCompte(compte.numero)}" icon="fa fa-pencil" title="Gérer" />
+                                </p:column>
+                                <p:column headerText="Numéro" sortBy="#{compte.numero}" filterBy="#{compte.numero}">
+                                    <h:outputText value="#{compte.numero}" />
+                                </p:column>
+                                <p:column headerText="Solde" sortBy="#{compte.solde}" filterBy="#{compte.solde}">
+                                    <h:outputText value="#{compte.solde}">
+                                        <f:convertNumber type="currency" currencySymbol="€" />
+                                    </h:outputText>
+                                </p:column>
+                                <p:column headerText="Type" sortBy="#{compte.type}" filterBy="#{compte.type}">
+                                    <h:outputText value="#{bundle['compte.type.'.concat(compte.type)]}" />
+                                    <br />
+                                    <h:outputText value="#{bundle['compte.detail.'.concat(compte.type)]}" />
+                                </p:column>
+                                <p:column headerText="Statut" sortBy="#{compte.estBloque}" filterBy="#{compte.estBloque}">
+                                    <h:outputText value="#{compte.estBloque ? 'Bloqué' : 'Actif'}"/>
+                                </p:column>                                
+                            </p:dataTable>
+                        </c:when>
+                        <c:otherwise>
+                            <br />
+                            <p:outputLabel value="Les gestionnaires n'ont pas de compte."/>                                
+                        </c:otherwise>
+                    </c:choose>
+                </c:when>
+            </c:choose>
+        </h:form>
+
+   <!-- </h:form> -->
+</ui:composition>

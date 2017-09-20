@@ -1,0 +1,75 @@
+<ui:composition 
+    xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+    
+    <p:dialog id="modaleGererCompte" header="Gérer Compte n°#{gestionCompteBacking.compteSelectionne.numero}" widgetVar="modaleGererCompte" modal="true" resizable="false" onShow="PF('modaleGererCompte').initPosition()" width="70%" style="height: auto; max-height: 80%; overflow-y: auto;">
+        <p:ajax event="close" update="formListeComptes listeProprietairesCompte" listener="#{gestionCompteBacking.rafraichirListeComptes()}"/>
+        <div class="main">
+            <h:form id="formulaireEditerCompte">
+                <p:panel header="Édition du compte">
+                    <p:messages showDetail="true" closable="true"/>
+                    <h:panelGrid columns="2">
+                        <h:outputText value="Type de compte : " />
+                        <h:selectOneMenu id="typeEdit" value="#{gestionCompteBacking.compteSelectionne.type}">
+                            <f:selectItems value="#{gestionCompteBacking.listeTypes}" />
+                        </h:selectOneMenu>
+
+                        <h:outputText value="Solde du compte : " />
+                        <h:outputText id="soldeEdit" value="#{gestionCompteBacking.compteSelectionne.solde}">
+                            <f:convertNumber type="currency" currencySymbol="€" />
+                        </h:outputText>
+
+                        <h:outputText value="Compte bloqué : " />
+                        <h:selectBooleanCheckbox id="estBloqueEdit" value="#{gestionCompteBacking.compteSelectionne.estBloque}" />
+                    </h:panelGrid>
+                    <p:commandButton id="btn2" value="Sauvegarder les modifications" action="#{gestionCompteBacking.modifierCompte()}" update="formulaireEditerCompte" />
+                </p:panel>
+            </h:form>
+            <h:form id="formulaireGererCompte">
+                <br />
+                <p:panel header="Liste des propriétaires">
+                    <p:dataTable id="listeProprietairesCompteEdit" widgetVar="listeProprietairesIndexWidgetVar" var="utilisateur" value="#{gestionCompteBacking.compteSelectionne.listeProprietaires}" selectionMode="single" rowKey="#{utilisateur.idClient}">
+                        <p:ajax event="rowDblselect" listener="#{gestionCompteBacking.onRowDblclickProprietaireCompte}" />
+                        <p:column headerText="ID Client" width="90">
+                            <h:outputText value="#{utilisateur.idClient}" />
+                        </p:column>
+                        <p:column headerText="Nom d'utilisateur">
+                            <h:outputText value="#{utilisateur.nomUtilisateur}" />
+                        </p:column>
+                        <p:column headerText="Date de naissance">
+                            <h:outputText value="#{utilisateur.dateDeNaissance}" />
+                        </p:column>
+                        <p:column headerText="" width="50">
+                            <p:commandButton actionListener="#{gestionCompteBacking.redirigerClient(utilisateur.idClient)}" icon="ui-icon ui-icon-transferthick-e-w" title="Gérer" />
+                        </p:column>
+                    </p:dataTable>
+                </p:panel>
+                <br />
+                <p:panel header="Ajouter/supprimer des propriétaires">
+                    <p:messages showDetail="true" closable="true"/>
+                    <p:pickList id="PojoPickList" value="#{gestionCompteBacking.listeDouble}" var="client" effect="bounce"
+                                itemValue="#{client}" itemLabel="#{client.afficherInformations()}" converter="entityConverter" showCheckbox="true" responsive="true"
+                                showSourceFilter="true" showTargetFilter="true" filterMatchMode="contains">
+
+                        <f:facet name="sourceCaption">Clients non-liés à ce compte</f:facet>
+                        <f:facet name="targetCaption">Client(s) lié(s) à ce compte</f:facet>
+
+                        <p:ajax event="transfer" listener="#{gestionCompteBacking.onTransfer}" />
+                        <p:ajax event="select" listener="#{gestionCompteBacking.onSelect}" />
+                        <p:ajax event="unselect" listener="#{gestionCompteBacking.onUnselect}" />
+                        <p:ajax event="reorder" listener="#{gestionCompteBacking.onReorder}" />
+
+                        <p:column style="width:100%;">
+                            <h:outputText value="#{client.afficherInformations()}" />
+                        </p:column>
+                    </p:pickList>
+                    <p:commandButton id="btn" value="Sauvegarder les modifications" action="#{gestionCompteBacking.rendreProprietaire()}" update="formulaireGererCompte" />
+                </p:panel>
+            </h:form>
+        </div>
+    </p:dialog>
+</ui:composition>

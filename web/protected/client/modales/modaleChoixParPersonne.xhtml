@@ -1,0 +1,42 @@
+<ui:composition 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <p:dialog id="modaleChoixParPersonne" header="Chercher un compte via un client" widgetVar="modaleChoixParPersonne" modal="true" resizable="false" onShow="PF('modaleChoixParPersonne').initPosition()" width="50%" style="height: auto; max-height: 80%; overflow-y: auto;">
+
+        <h:outputText value="Sélectionnez un client" /><br /><br />
+        <p:dataTable id="listeClient" var="client" value="#{clientBacking.listeClients}" selectionMode="single" selection="#{clientBacking.clientSelectionne}" rowKey="#{client.idClient}"
+                     paginatorPosition="bottom" styleClass="paginated" rows="5" paginator="true" 
+                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                     rowsPerPageTemplate="5,10,15">
+            <p:ajax event="rowSelect" listener="#{clientBacking.onRowSelectUtilisateur}" update="nouveauVirement:listeComptesClientSelectionne " />
+            <p:ajax event="rowUnselect" listener="#{clientBacking.onRowUnselectUtilisateur}" update="" />
+            <p:column filterBy="#{client.idClient}" headerText="ID Client" filterMatchMode="contains">
+                <h:outputText value="#{client.idClient}" />
+            </p:column>
+            <p:column filterBy="#{client.nomUtilisateur}" headerText="Nom d'utilisateur" filterMatchMode="contains">
+                <h:outputText value="#{client.nomUtilisateur}" />
+            </p:column>
+            <p:column headerText="Date de naissance">
+                <h:outputText value="#{client.dateDeNaissance}" />
+            </p:column>
+        </p:dataTable>
+        <br />
+        <h:outputText value="Puis sélectionnez un compte" /><br /><br />
+        <p:dataTable id="listeComptesClientSelectionne" var="comptesClientSelectionne" value="#{clientBacking.comptesClientSelectionne}" selectionMode="single" rowKey="#{comptesClientSelectionne.numero}"
+                     paginatorPosition="bottom" styleClass="paginated" rows="5" paginator="true" 
+                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                     rowsPerPageTemplate="5,10,15">
+            <p:ajax event="rowSelect" listener="#{clientBacking.onRowSelectCompteDestinataire}" update=":nouveauVirement:compteCrediteur :nouveauVirement:labelCompteDestinataire :nouveauVirement:compteVirement :nouveauVirement:boutonValiderVirement" />
+            <p:ajax event="rowUnselect" listener="#{clientBacking.onRowUnselectCompteDestinataire}" update="" />
+            <p:column headerText="Compte(s) du client n° #{clientBacking.clientSelectionne.idClient}">
+                <h:outputText value="#{comptesClientSelectionne.numero}" />
+            </p:column>
+        </p:dataTable>
+        <br />
+        <p:commandButton value="Fermer cette fenêtre" oncomplete="PF('modaleChoixParPersonne').hide()" style="width: 300px; left: calc(100% - 300px);"/>
+         
+    </p:dialog>
+  </ui:composition>

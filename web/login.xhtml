@@ -1,0 +1,45 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+    
+    <ui:composition template="/templates/visiteur_template.xhtml">
+        
+        <ui:define name="titre">Pari Bisar Fortish - S'authentifier</ui:define>
+        
+        <ui:define name="menu">
+            <div class="menu">
+                <ul>
+                    <li><h:link value="Accueil" outcome="index"/></li>
+                </ul>
+            </div>
+        </ui:define>
+        
+        <ui:define name="content">
+            <div class="main">
+                <h:form id="formLogIn" style="position: relative; width: 450px; left: calc(50% - 225px);">
+                    <p:remoteCommand name="onload" oncomplete="#{logInBacking.redirigerLogin()}" autoRun="true" />
+                    <p:messages showDetail="true" closable="true"/>
+                    <br />
+                    <div style="display: table;">
+                        <p style="display: table-row;">
+                            <label style="display: table-cell; text-align: right; padding-right: 5px; white-space: nowrap;">Nom d'utilisateur :</label>
+                            <h:inputText id="pseudo" value="#{logInBacking.nomUtilisateur}" required="true" requiredMessage="Pseudo is required" style="display: table-cell;" />
+                        </p>
+                        <br />
+                        <p style="display: table-row;">
+                            <label style="display: table-cell; text-align: right; padding-right: 5px; white-space: nowrap;">Mot de passe :</label>
+                            <h:inputSecret id="password" value="#{logInBacking.motDePasse}" style="display: table-cell;" />
+                        </p>
+                        <br />
+                        <p style="display: table-row;">
+                            <label style="display: table-cell;"></label>
+                            <p:commandButton value="Se connecter" action="#{logInBacking.login}" class="bouton" style="display: table-cell; width: 100%;" update="formLogIn" />
+                        </p>
+                    </div>
+                </h:form>
+            </div>
+        </ui:define>
+
+    </ui:composition>
+</html>

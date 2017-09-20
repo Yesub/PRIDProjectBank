@@ -1,0 +1,26 @@
+<ui:composition 
+    xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+    
+    <p:dialog id="modaleVirementsRefuses" header="Virements refusés" widgetVar="modaleVirementsRefuses" modal="true" resizable="false" 
+              onShow="PF('modaleVirementsRefuses').initPosition()" width="50%" style="height: auto; max-height: 80%; overflow-y: auto;">
+        
+        <!-- Lister les virements qui n'ont pas été acceptés -->
+        <!-- Cliquer sur "Ok" remettra gestionCompteBacking.virementsRefuses à null -->
+        <h:form id="formulaireListerVirementsRefuses">
+            <c:forEach var="echec" items="#{gestionCompteBacking.virementsRefuses}">
+                <h:outputText value="Virement du compte n° #{echec.key.debiteur.numero} au compte n° #{echec.key.credite.numero} pour un montant de #{echec.key.montant} €." /><br />
+                <h:outputText value="Raison#{echec.value.size() == 1 ? '' : 's'} de l'échec : " />
+                <ui:repeat value="#{echec.value}" var="erreur">
+                    <li>
+                        <h:outputText value="#{erreur}" />
+                    </li>
+                </ui:repeat>
+                <br /><br />
+            </c:forEach>
+        </h:form>
+    </p:dialog>
+</ui:composition>

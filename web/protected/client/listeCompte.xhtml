@@ -1,0 +1,33 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:f="http://xmlns.jcp.org/jsf/core"
+    xmlns:h="http://xmlns.jcp.org/jsf/html">
+    <!-- <h:form > -->
+        <f:loadBundle basename="pridbank.ressources.Bundle" var="bundle"/>
+        <p:dataTable id="listeComptesIndex" widgetVar="listeComptesIndexWidgetVar" var="compte" value="#{clientBacking.listeComptes}" selectionMode="single" selection="#{clientBacking.compteSelectionne}" rowKey="#{compte.numero}" paginator="true" rows="10" paginatorPosition="bottom">
+            <f:facet name="header">
+                Vos comptes
+            </f:facet>
+            <p:ajax event="rowSelect" listener="#{clientBacking.onRowSelectCompte}" update=":indexClient:listeVirementsIndex" />
+            <p:ajax event="rowUnselect" listener="#{clientBacking.onRowUnselectCompte}" update="" />
+            <p:column headerText="Numéro">
+                <h:outputText value="#{compte.numero}" />
+            </p:column>
+            <p:column headerText="Solde">
+                <h:outputText value="#{compte.solde}">
+                    <f:convertNumber type="currency" currencySymbol="€" />
+                </h:outputText>
+            </p:column>
+            <p:column headerText="Type">
+                <h:outputText value="#{bundle['compte.type.'.concat(compte.type)]}" />
+                <br />
+                <h:outputText value="#{bundle['compte.detail.'.concat(compte.type)]}" />
+            </p:column>
+            <p:column headerText="Statut">
+                <h:outputText value="#{compte.estBloque ? 'Bloqué' : 'Actif'}"/>
+            </p:column>
+        </p:dataTable>
+   <!-- </h:form> -->
+</ui:composition>

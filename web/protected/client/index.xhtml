@@ -1,0 +1,29 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+    
+    <ui:composition template="/templates/client_template.xhtml">
+        
+        <ui:define name="titre">Pari Bisar Fortish - Tableau de bord du client</ui:define>
+        
+        <ui:define name="content">
+            <div class="main">
+                
+                <h:form id="indexClient">
+                    
+                    <p:messages id='affichageMessagesIndexClient' showDetail="true" closable="true"/>
+                    <br />
+                    <ui:include src="/protected/client/listeCompte.xhtml" />
+                    <br />
+                    <ui:include src="/protected/client/listeVirements.xhtml" />
+                     
+                </h:form>
+                
+            </div>
+            <ui:include src="/protected/client/modales/modaleNouveauVirement.xhtml" />
+        </ui:define>
+        
+    </ui:composition>
+</html>

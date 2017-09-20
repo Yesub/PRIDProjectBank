@@ -1,0 +1,42 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+    
+    <ui:composition template="/templates/visiteur_template.xhtml">
+        
+        <ui:define name="titre">Pari Bisar Fortish</ui:define>
+        
+        <ui:define name="menu">
+            <div class="menu">
+                <ul>
+                    <c:choose>
+                        <c:when test="#{logInBacking.utilisateurCourant == null}">
+                            <li><h:link value="S'authentifier" outcome="login"/></li>
+                        </c:when>
+                        <c:otherwise>
+                            <c:choose>
+                                <c:when test="#{logInBacking.utilisateurCourant.estUnGestionnaire}">
+                                    <li><h:link value="Retourner à l'interface de gestion" outcome="/protected/gestionnaire/index.xhtml"/></li>
+                                </c:when>
+                                <c:otherwise>
+                                    <li><h:link value="Retourner à l'interface client" outcome="/protected/client/index.xhtml"/></li>
+                                </c:otherwise>
+                            </c:choose>
+                        </c:otherwise>
+                    </c:choose>
+                </ul>
+            </div>
+        </ui:define>
+        
+        <ui:define name="content">
+            <div class="main">
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin eget quam condimentum, semper risus in, ornare risus. Fusce odio velit, dapibus vel interdum in, fermentum eu nisl. Phasellus id cursus neque. Sed quis porttitor libero. Donec vulputate tincidunt elit, a blandit erat pharetra sit amet. Praesent rhoncus faucibus nisi, at accumsan lectus imperdiet non. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Mauris convallis tortor sit amet maximus fermentum. Mauris eget metus consectetur, placerat justo sed, ornare leo. Donec maximus efficitur cursus. Vestibulum scelerisque dictum ultricies. Fusce vehicula vitae odio in malesuada. Nam vestibulum nisi dignissim nisi imperdiet, ornare facilisis metus molestie. Aenean ultrices suscipit dolor. Sed a magna ullamcorper, lobortis odio id, varius lectus. Nunc neque mi, ornare sit amet volutpat id, elementum et quam.</p>
+                <p>Nam quis laoreet ante. Suspendisse non nunc neque. Ut a pulvinar odio. Nulla ultrices non purus non fringilla. Cras convallis enim massa, at maximus enim consectetur mollis. Nam consequat quam odio, sit amet finibus nunc congue a. Fusce egestas tempus odio vel aliquet. Nunc cursus elementum leo malesuada scelerisque. Curabitur aliquam quam ac neque sollicitudin consequat.</p>
+            </div>
+        </ui:define>
+
+    </ui:composition>
+</html>

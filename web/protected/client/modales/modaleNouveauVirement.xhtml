@@ -1,0 +1,114 @@
+<ui:composition 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:f="http://xmlns.jcp.org/jsf/core"
+    xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+    <h:form id="nouveauVirement">
+        <f:loadBundle basename="pridbank.ressources.Bundle" var="bundle"/>
+        <p:dialog id="modaleNouveauVirement" header="Effectuer un virement" widgetVar="modaleNouveauVirement" modal="true" resizable="false"
+                  onShow="PF('modaleNouveauVirement').initPosition()" width="70%" style="height: auto; max-height: 80%; overflow-y: auto;">
+            <p:ajax event="close" update=":nouveauVirement :indexClient:listeComptesIndex :indexClient:listeVirementsIndex" listener='#{clientBacking.closeModaleVirement}'/>
+            <p:ajax event="open" update=":indexClient:listeVirementsIndex" />
+            <p:messages id="messagesModaleNouveauVirement" showDetail="true" closable="true" />
+            <p:outputLabel for="listeComptes" value="Sélectionnez l'un de vos comptes :" /><br /><br />
+            <p:dataTable id="listeComptes" var="compte" value="#{clientBacking.compteNonBloque}" selectionMode="single" selection="#{clientBacking.compteSelectionne}" rowKey="#{compte.numero}" paginator="true" rows="5" paginatorPosition="bottom">
+                <p:ajax event="rowSelect" listener="#{clientBacking.onRowSelectCompte}" update=":nouveauVirement:sommeRestanteLabel :nouveauVirement:sommeRestante :nouveauVirement:compteDebiteur :nouveauVirement:sommeVirement :nouveauVirement:labelCompteSelectionne :nouveauVirement:boutonValiderVirement" />
+                <p:ajax event="rowUnselect" listener="#{clientBacking.onRowUnselectCompte}" update=":nouveauVirement:boutonValiderVirement" />
+                <p:column headerText="Numéro">
+                    <h:outputText value="#{compte.numero}" />
+                </p:column>
+                <p:column headerText="Type">
+                    <h:outputText value="#{bundle['compte.type.'.concat(compte.type)]}" />
+                </p:column>
+                <p:column headerText="Solde">
+                    <h:outputText value="#{compte.solde}"><f:convertNumber type="currency" currencySymbol="€" /></h:outputText>
+                </p:column>
+                <p:column headerText="Découvert autorisé">
+                    <h:outputText value="#{compte.getPlancher().get(compte.type)}"><f:convertNumber type="currency" currencySymbol="€" /></h:outputText>
+                </p:column>
+            </p:dataTable>
+            
+            <h:panelGrid columns="2" width="100%" columnClasses="tableValignTop, tableValignTop">
+                <p:panel class="tableValignTop">
+                    <p:outputLabel for="listeComptes" value="Sélectionnez le compte destinataire :" /><br />
+                    <ul>
+                        <li>
+                            <h:outputLabel for="" value="Via son numéro : "/>
+                            <p:inputNumber id="compteVirement" value="#{clientBacking.numeroCompteDestinataire}" decimalPlaces="0">
+                                <p:ajax update=":nouveauVirement:compteCrediteur :nouveauVirement:labelCompteDestinataire :nouveauVirement:messagesModaleNouveauVirement :nouveauVirement:boutonValiderVirement" listener="#{clientBacking.onChangeNumeroCompteDestinataire}"/>
+                            </p:inputNumber>
+                        </li><br />
+                        <li>
+                            <h:outputLabel for="boutonRecherche" value="Via le profil d'un client : " />
+                            <p:commandButton id="boutonRecherche" update=":nouveauVirement:modaleChoixParPersonne" oncomplete="PF('modaleChoixParPersonne').show()" title="Rechercher un compte"/>
+                        </li>
+                    </ul>
+                </p:panel>
+                <p:panel class="tableValignTop">
+                    <p:outputLabel for="sommeRestante" id="sommeRestanteLabel" value="#{clientBacking.compteSelectionne eq null ? '' : ' Limite hebdomadaire pour ce compte : '}"/>
+                    <h:outputText id="sommeRestante" value="#{clientBacking.compteSelectionne eq null ? '' : clientBacking.sommeDisponiblePourVirement}" >
+                        <f:convertNumber type="currency" currencySymbol="€" />
+                    </h:outputText>
+                    <br /><br />
+                    <p:outputLabel value="Entrez un montant : "/>
+                    <p:inputNumber id="sommeVirement" value="#{clientBacking.sommeVirement}" minValue="0.01" maxValue="#{clientBacking.compteSelectionne eq null ? '0' : clientBacking.sommeDisponiblePourVirement}" 
+                                   onfocus="this.select()" onclick="this.select()" symbol=" €" symbolPosition="s" decimalSeparator="," thousandSeparator=" " >
+                        <p:ajax update=":nouveauVirement:labelSommeVirement :nouveauVirement:sommeVirementRecapitulatif :nouveauVirement:boutonValiderVirement"/>
+                    </p:inputNumber>
+
+                    <br /><br />
+
+                    <h:outputLabel value="Choisissez une date d'exécution : "/>
+                    <p:calendar id="dateExecution" value="#{clientBacking.dateExecution}" lang="fr" locale="fr" navigator="true" mode="popup" pattern="dd/MM/yyyy">
+                        <p:ajax event="dateSelect" listener="#{clientBacking.changerDate}" update=":nouveauVirement:sommeRestante :nouveauVirement:sommeVirement :nouveauVirement:dateExecutionRecapitulatif :nouveauVirement:messagesModaleNouveauVirement :nouveauVirement:boutonValiderVirement"/>
+                    </p:calendar>
+                </p:panel>
+            </h:panelGrid>
+            
+            <h:outputText value="Résumé : exécuter un virement du compte n° " />
+            <h:outputText id="labelCompteSelectionne" value="#{clientBacking.compteSelectionne.numero == null ? '?' : clientBacking.compteSelectionne.numero}"/>
+            <h:outputText value=" vers le compte n° " />
+            <h:outputText id="labelCompteDestinataire" value="#{clientBacking.compteDestinataire.numero == null ? '?' : clientBacking.compteDestinataire.numero}"/>
+            <h:outputText value=" pour un montant de " />
+            <h:outputText id="labelSommeVirement" value="#{clientBacking.sommeVirement}">
+                <f:convertNumber type="currency" currencySymbol="€" />
+            </h:outputText>
+            <h:outputText value=" à la date du " />
+            <h:outputText value="#{clientBacking.dateExecution.toLocaleString()}" />
+            <h:outputText value="." />
+            <br /><br />
+            
+            <p:commandButton id="boutonValiderVirement" value="Effectuer le virement" disabled="#{clientBacking.desactiverBoutonValiderVirement()}" action="#{clientBacking.effectuerVirement}" update=":nouveauVirement :indexClient:listeComptesIndex :indexClient:listeVirementsIndex" oncomplete="PF('modaleNouveauVirement').show()" style="width: 300px; left: calc(50% - 150px);">
+                <p:confirm header="Confirmation du virement" icon="ui-icon-alert" />
+            </p:commandButton>
+            
+            <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" width="40%">
+                <f:facet name="message">
+                    <h:outputLabel value="Êtes-vous certain(e) de vouloir exécuter le virement suivant ?"/>
+                    <br/><br />
+                    <h:outputLabel id="compteDebiteur" value="Depuis le compte : ">
+                        #{clientBacking.compteSelectionne.numero}
+                    </h:outputLabel>
+                    <br/>
+                    <h:outputLabel id="compteCrediteur" value="Vers le compte : ">
+                        #{clientBacking.compteDestinataire.numero}
+                    </h:outputLabel>
+                    <br/>
+                    <h:outputLabel id="sommeVirementRecapitulatif" value="Pour la somme de : ">
+                        #{clientBacking.afficherMontantVirement()}
+                    </h:outputLabel>
+                    <br/>
+                    <h:outputLabel id="dateExecutionRecapitulatif" value="À la date du : ">
+                        #{clientBacking.dateExecution.toLocaleString()}
+                    </h:outputLabel> 
+                </f:facet>
+                <p:commandButton value="Oui, je confirme" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="width: 40%;" />
+                <p:commandButton value="Non, annuler l'opération" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" style="width: 57%;" />
+            </p:confirmDialog>
+            
+        </p:dialog>
+        <ui:include src="/protected/client/modales/modaleChoixParPersonne.xhtml" />
+    </h:form>
+</ui:composition>

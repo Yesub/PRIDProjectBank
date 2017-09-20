@@ -1,0 +1,44 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:f="http://xmlns.jcp.org/jsf/core"
+    xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+    <c:choose>
+        <c:when test="#{clientBacking.compteSelectionne != null}">
+            <p:dataTable id="listeVirementsIndex" widgetVar="listeVirementsIndexWidgetVar" var="virement" value="#{clientBacking.listeVirements}" paginator="true" rows="10" paginatorPosition="bottom">
+                <f:facet name="header">
+                    Historique du compte n° #{clientBacking.compteSelectionne.numero}
+                </f:facet>
+                <p:column headerText="Numéro" sortBy="#{virement.numerovirement}" filterBy="#{virement.numerovirement}" filterMatchMode="contains">
+                    <h:outputText value="#{virement.numerovirement}" />
+                </p:column>
+                <p:column headerText="Montant" sortBy="#{virement.montant}" filterBy="#{virement.montant}" filterMatchMode="contains">
+                    <h:outputText value="#{virement.debiteur.numero eq clientBacking.compteSelectionne.numero ? - virement.montant : virement.montant}">
+                        <f:convertNumber type="currency" currencySymbol="€" />
+                    </h:outputText>
+                </p:column>
+                <p:column headerText="Date virement" sortBy="#{virement.datevirement}" filterBy="#{virement.datevirement}" filterMatchMode="contains">
+                    <h:outputText value="#{virement.datevirement.toLocaleString()}" />
+                </p:column>
+                <p:column headerText="Date execution" sortBy="#{virement.dateexecution}" filterBy="#{virement.dateexecution}" filterMatchMode="contains">
+                    <h:outputText value="#{virement.dateexecution.toLocaleString() eq null ? 'Non executé' : virement.dateexecution.toLocaleString()}" />
+                </p:column>
+                <p:column headerText="Compte credite" sortBy="#{virement.credite.numero}" filterBy="#{virement.credite.numero}" filterMatchMode="contains">
+                    <h:outputText value="#{virement.credite.numero eq clientBacking.compteSelectionne.numero ? '/' : virement.credite.numero}" />
+                </p:column>
+                <p:column headerText="Compte debiteur" sortBy="#{virement.debiteur.numero}" filterBy="#{virement.debiteur.numero}" filterMatchMode="contains">
+                    <h:outputText value="#{virement.debiteur.numero eq clientBacking.compteSelectionne.numero ? '/' : virement.debiteur.numero }" />
+                </p:column>
+                <p:column headerText="Supprimer"> 
+                        <p:commandButton rendered="#{virement.dateexecution.toLocaleString() eq null}" id='supprimerVirement' value='Supprimer' 
+                                         action='#{clientBacking.supprimerVirement(virement)}' update=':indexClient:listeComptesIndex :indexClient:listeVirementsIndex'/>
+                </p:column>
+            </p:dataTable>
+        </c:when>
+        <c:otherwise>
+            <h:outputText id="listeVirementsIndex" value="" />
+        </c:otherwise>
+    </c:choose>
+</ui:composition>

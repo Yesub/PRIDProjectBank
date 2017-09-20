@@ -1,0 +1,78 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    
+    <ui:composition template="/templates/gestionnaire_template.xhtml">
+        
+        <ui:define name="titre">Pari Bisar Fortish - Les utilisateurs</ui:define>
+        
+        <ui:define name="content">
+            
+            <div class="main">                
+                <h:form id="formCreerNouvelUtilisateur" prependId="false">
+                    <!-- pour savoir à quoi ça sert, voir sous listerComptes.xhtml -->
+                    <p:remoteCommand name="onload" oncomplete="#{gestionUtilisateurBacking.utilisateurSelectionne eq null ? '' : 'PF(\'modaleGererUtilisateur\').show()'}" autoRun="true" />
+                    <p:commandButton class="bouton" update="formCreerNouvelUtilisateur" value="Créer un utilisateur" oncomplete="PF('wiz').loadStep(PF('wiz').cfg.steps[0], true); PF('modaleCreerUtilisateur').show();" icon="fa fa-user-plus">
+                        <f:actionListener binding="#{gestionUtilisateurBacking.appelCreationNouvelUtilisateur()}" />
+                    </p:commandButton>
+                </h:form>
+
+                <h:form id="formulaireListerUtilisateurs">
+                    <p:messages showDetail="true" closable="true"/>
+                    <br/>
+                    <p:dataTable id="listeUtilisateurs" value="#{gestionUtilisateurBacking.listeUtilisateurs}" var="utilisateur" paginator="true" rows="10" paginatorPosition="bottom" styleClass="paginated" rowKey="#{utilisateur.idClient}" selection="#{gestionUtilisateurBacking.utilisateurSelectionne}" selectionMode="single">
+                        <f:facet name="header">
+                            Liste des utilisateurs
+                        </f:facet>
+                        <p:ajax event="rowSelect" listener="#{gestionUtilisateurBacking.onRowSelectUtilisateur}" update="listeComptesClient" />
+                        <p:ajax event="rowUnselect" listener="#{gestionUtilisateurBacking.onRowUnselectUtilisateur}" update="" />
+
+                        <p:column headerText="" width="115">
+                            <p:commandButton oncomplete="PF('modaleGererUtilisateur').show()" update="formulaireGererUtilisateur formulaireGererClient " icon="fa fa-pencil" title="Gérer">
+                                <f:setPropertyActionListener value="#{utilisateur}" target="#{gestionUtilisateurBacking.utilisateurSelectionne}"/>
+                                <f:actionListener binding="#{gestionUtilisateurBacking.editerUtilisateur()}" />
+                            </p:commandButton>
+                            <p:commandButton action="#{gestionUtilisateurBacking.supprimerUtilisateur(utilisateur.idClient)}" update="formulaireListerUtilisateurs" icon="fa fa-remove" title="Supprimer">
+                                <p:confirm header="Confirmation" message="Voulez-vous vraiment supprimer cet utilisateur?" icon="ui-icon-alert" />
+                            </p:commandButton>
+                            <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                                <p:commandButton value="Oui" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+                                <p:commandButton value="Non" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+                            </p:confirmDialog>
+                        </p:column>
+
+                        <p:column headerText="ID Client" sortBy="#{utilisateur.idClient}" filterBy="#{utilisateur.idClient}">
+                            <h:outputText value="#{utilisateur.idClient}" />
+                        </p:column>
+
+                        <p:column headerText="Nom" sortBy="#{utilisateur.nomUtilisateur}" filterBy="#{utilisateur.nomUtilisateur}">
+                            <h:outputText value="#{utilisateur.nomUtilisateur}" />
+                        </p:column>
+
+                        <p:column headerText="Date de naissance" sortBy="#{utilisateur.dateDeNaissance}" filterBy="#{utilisateur.dateDeNaissance}">
+                            <h:outputText value="#{utilisateur.dateDeNaissance}">
+                                <f:convertDateTime locale="fr" pattern="dd MMM yyyy" /> <!-- Un jour d'avance ! wtf ! -->
+                            </h:outputText>
+                        </p:column>
+
+                        <p:column headerText="Fonction" sortBy="#{utilisateur.estUnGestionnaire}" filterBy="#{utilisateur.estUnGestionnaire}">
+                            <h:outputText value="#{utilisateur.estUnGestionnaire?'Gestionnaire':'Client'}"/>
+                        </p:column>
+
+                        <f:facet name="footer">
+                            Nombre d'utilisateurs : #{fn:length(gestionUtilisateurBacking.listeUtilisateurs)}
+                        </f:facet>
+                    </p:dataTable>
+                </h:form>
+
+                <ui:include src="/protected/gestionnaire/listeComptesClient.xhtml" />
+                <ui:include src="/protected/gestionnaire/modales/modaleCreerUtilisateur.xhtml" />
+                <ui:include src="/protected/gestionnaire/modales/modaleGererUtilisateur.xhtml" />
+            </div>
+        </ui:define>
+    </ui:composition>
+    
+</html>
